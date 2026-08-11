@@ -20,7 +20,7 @@ function corsHeaders(origin) {
   };
 }
 
-function json(data, status = 200, origin = ALLOWED_ORIGIN) {
+function json(data, status = 200, origin = null) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
@@ -105,7 +105,7 @@ function validatePayload(p) {
 
 async function handleSubmit(request, env) {
   const origin = request.headers.get("Origin");
-  if (origin && origin !== ALLOWED_ORIGIN) {
+  if (origin && !ALLOWED_ORIGIN.has(orgin)) {
     return json({ success: false, message: "Request origin not allowed." }, 403, origin);
   }
 
