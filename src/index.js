@@ -1,8 +1,24 @@
-const ALLOWED_ORIGIN = "https://intake.stone-crafters.com";
+const ALLOWED_ORIGINS = new Set([
+  "https://intake.stone-crafters.com",
+  "https://project-intake-form.scorderdesk.workers.dev"
+]);
+
 const BOARD_ID = "18418995265";
 const GROUP_ID = "group_mm4ktsx2";
 const API_VERSION = "2026-07";
 
+function corsHeaders(origin) {
+  const allowedOrigin = ALLOWED_ORIGINS.has(origin)
+    ? origin
+    : "https://intake.stone-crafters.com";
+
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Vary": "Origin"
+  };
+}
 function corsHeaders(origin) {
   const allowed = origin === ALLOWED_ORIGIN || origin === null;
   return {
