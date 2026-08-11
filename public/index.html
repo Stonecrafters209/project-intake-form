@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stone Crafters – Project Intake Form</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #1a1a1a;
+      font-family: 'Poppins', sans-serif;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: #222;
+      border: 1px solid #333;
+      border-radius: 14px;
+      padding: 44px 40px;
+      max-width: 620px;
+      width: 100%;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    }
+
+    /* ── LOGO ── */
+    .logo-area { text-align: center; margin-bottom: 32px; }
+    .logo-area h1 { font-size: 26px; font-weight: 700; color: #C9A84C; letter-spacing: 1px; }
+    .logo-area p  { font-size: 14px; color: #aaa; margin-top: 6px; }
+
+    .divider { border: none; border-top: 1px solid #333; margin: 24px 0; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #C9A84C;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    select,
+    textarea {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 15px;
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: 'Poppins', sans-serif;
+      margin-bottom: 20px;
+    }
+
+    input:focus, select:focus, textarea:focus { border-color: #C9A84C; }
+    input::placeholder, textarea::placeholder { color: #666; }
+    select option { background: #1a1a1a; color: #fff; }
+    textarea { resize: vertical; min-height: 100px; }
+
+    .toggle-group { display: flex; gap: 12px; margin-bottom: 20px; }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: #1a1a1a;
+      color: #aaa;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .toggle-btn.active {
+      border-color: #C9A84C;
+      background: rgba(201,168,76,0.12);
+      color: #C9A84C;
+    }
+
+    .contractor-section {
+      display: none;
+      background: rgba(201,168,76,0.06);
+      border: 1px solid #C9A84C44;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .contractor-section.visible { display: block; }
+
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: #C9A84C;
+      color: #1a1a1a;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: 'Poppins', sans-serif;
+      letter-spacing: 0.5px;
+      margin-top: 8px;
+    }
+
+    .submit-btn:hover { background: #e0bc6a; }
+    .submit-btn:disabled { background: #555; color: #888; cursor: not-allowed; }
+
+    .status-box {
+      display: none;
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 18px;
+      text-align: center;
+    }
+
+    .status-box.success {
+      display: block;
+      background: rgba(0,200,117,0.12);
+      border: 1px solid #00c875;
+      color: #00c875;
+    }
+
+    .status-box.error {
+      display: block;
+      background: rgba(223,47,74,0.12);
+      border: 1px solid #df2f4a;
+      color: #df2f4a;
+    }
+
+    .required-note { font-size: 12px; color: #666; margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <!-- ══ HEADER ══ -->
+  <div class="logo-area">
+    <h1>STONE CRAFTERS</h1>
+    <p>Project Intake Form — Tell us about your project</p>
+  </div>
+
+  <form id="leadForm">
+    <p class="required-note">Fields marked with * are required.</p>
+
+    <!-- CONTRACTOR TOGGLE -->
+    <label>Are You a Contractor? *</label>
+    <div class="toggle-group">
+      <button type="button" class="toggle-btn" id="btnNo"  onclick="setContractor(false)">No — Private Client</button>
+      <button type="button" class="toggle-btn" id="btnYes" onclick="setContractor(true)">Yes — Contractor</button>
+    </div>
+
+    <!-- CONTRACTOR DETAILS (shown only when contractor = yes) -->
+    <div class="contractor-section" id="contractorSection">
+      <label>Company Name *</label>
+      <input type="text" id="contractorCompany" placeholder="e.g. ABC Builders" />
+      <label>Your Name *</label>
+      <input type="text" id="contractorName" placeholder="e.g. John Smith" />
+    </div>
+
+    <!-- JOB NAME -->
+    <label>Your Name / Job Name *</label>
+    <input type="text" id="jobName" placeholder="e.g. Smith Kitchen Remodel" required />
+
+    <!-- PROJECT ADDRESS -->
+    <label>Project Address *</label>
+    <input type="text" id="projectAddress" placeholder="123 Main St, City, CA 90210" required />
+
+    <!-- PROJECT TYPE -->
+    <label>Project Type *</label>
+    <select id="projectType" required>
+      <option value="">— Select a project type —</option>
+      <option value="Kitchen Countertops">Kitchen Countertops</option>
+      <option value="shower walls">Shower Walls</option>
+      <option value="Fireplace Surround">Fireplace Surround</option>
+      <option value="Outdoor Kitchen">Outdoor Kitchen</option>
+      <option value="Tile Work">Tile Work</option>
+      <option value="LVP Flooring">LVP Flooring</option>
+      <option value="Tile backsplash">Tile Backsplash</option>
+      <option value="COUNTER TOPS">Counter Tops</option>
+      <option value="Bathroom remodel">Bathroom Remodel</option>
+      <option value="Full Height Backsplash">Full Height Backsplash</option>
+    </select>
+
+    <!-- EMAIL -->
+    <label>Email Address *</label>
+    <input type="email" id="emailAddress" placeholder="your@email.com" required />
+
+    <!-- PHONE -->
+    <label>Phone Number</label>
+    <input type="tel" id="phoneNumber" placeholder="(555) 555-5555" />
+
+    <!-- PROJECT DESCRIPTION -->
+    <label>Project Details &amp; Notes *</label>
+    <textarea id="projectDetails" placeholder="Describe the scope of work, materials, dimensions, timeline, or anything else we should know..." required></textarea>
+
+    <hr class="divider" />
+
+    <button type="submit" class="submit-btn" id="submitBtn">Submit Project →</button>
+    <div class="status-box" id="statusBox"></div>
+  </form>
+
+</div>
+
+<script>
+  const BOARD_ID = "18418995265";
+  const GROUP_ID = "group_mm4ktsx2"; // New Leads
+
+  // ── Contractor toggle ──
+  let isContractor = null;
+
+  function setContractor(value) {
+    isContractor = value;
+    document.getElementById("btnYes").classList.toggle("active", value === true);
+    document.getElementById("btnNo").classList.toggle("active", value === false);
+    document.getElementById("contractorSection").classList.toggle("visible", value === true);
+  }
+
+  // ── Submit ──
+  document.getElementById("leadForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById("submitBtn");
+
+    if (isContractor === null) {
+      showError("Please select whether you are a Contractor or Private Client.");
+      return;
+    }
+
+    const jobName            = document.getElementById("jobName").value.trim();
+    const projectAddress     = document.getElementById("projectAddress").value.trim();
+    const projectType        = document.getElementById("projectType").value;
+    const emailVal           = document.getElementById("emailAddress").value.trim();
+    const phoneVal           = document.getElementById("phoneNumber").value.trim();
+    const projectDetails     = document.getElementById("projectDetails").value.trim();
+    const contractorCompany  = document.getElementById("contractorCompany").value.trim();
+    const contractorName     = document.getElementById("contractorName").value.trim();
+
+    if (!jobName || !projectAddress || !projectType || !emailVal || !projectDetails) {
+      showError("Please fill in all required fields.");
+      return;
+    }
+
+    if (isContractor && (!contractorCompany || !contractorName)) {
+      showError("Please enter your company name and your name.");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting…";
+    document.getElementById("statusBox").className = "status-box";
+    document.getElementById("statusBox").style.display = "none";
+
+    const payload = {
+      boardId: BOARD_ID,
+      groupId: GROUP_ID,
+      jobName,
+      projectAddress,
+      projectType,
+      email: emailVal,
+      phone: phoneVal,
+      projectDetails,
+      isContractor,
+      contractorCompany,
+      contractorName
+    };
+
+    try {
+      const res = await fetch("/api/submit-lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      let data = {};
+      try { data = await res.json(); } catch (_) {}
+
+      if (!res.ok || !data.success) {
+        const message = data.message || "We couldn't submit your project. Please try again.";
+        showError(message);
+        return;
+      }
+
+      showSuccess("✅ Project submitted! We'll be in touch soon.");
+      document.getElementById("leadForm").reset();
+      isContractor = null;
+      document.getElementById("btnYes").classList.remove("active");
+      document.getElementById("btnNo").classList.remove("active");
+      document.getElementById("contractorSection").classList.remove("visible");
+    } catch (err) {
+      console.error(err);
+      showError("We couldn't submit your project. Please check your connection and try again.");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Project →";
+    }
+  });
+
+  function showError(msg) {
+    const box = document.getElementById("statusBox");
+    box.textContent = "⚠️  " + msg;
+    box.className = "status-box error";
+  }
+
+  function showSuccess(msg) {
+    const box = document.getElementById("statusBox");
+    box.textContent = msg;
+    box.className = "status-box success";
+  }
+</script>
+</body>
+</html>
