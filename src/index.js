@@ -19,15 +19,6 @@ function corsHeaders(origin) {
     "Vary": "Origin"
   };
 }
-function corsHeaders(origin) {
-  const allowed = origin === ALLOWED_ORIGIN || origin === null;
-  return {
-    "Access-Control-Allow-Origin": allowed ? ALLOWED_ORIGIN : ALLOWED_ORIGIN,
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Vary": "Origin"
-  };
-}
 
 function json(data, status = 200, origin = ALLOWED_ORIGIN) {
   return new Response(JSON.stringify(data), {
