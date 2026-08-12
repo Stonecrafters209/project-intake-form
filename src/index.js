@@ -105,7 +105,7 @@ function validatePayload(p) {
 
 async function handleSubmit(request, env) {
   const origin = request.headers.get("Origin");
-  if (origin && !ALLOWED_ORIGIN.has(orgin)) {
+  if (origin && !ALLOWED_ORIGINS.has(orgin)) {
     return json({ success: false, message: "Request origin not allowed." }, 403, origin);
   }
 
