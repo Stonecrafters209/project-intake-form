@@ -159,7 +159,7 @@ async function handleSubmit(request, env) {
     item = data?.create_item;
   } catch (error) {
     console.error("Monday create_item failed:", error.message);
-    return json({ success: false, message: "MONDAY_ERROR: " + error.message }, 502, origin);
+    return json({ success: false, message: "MONDAY_ERROR: " + error.message }, 200, origin);
   }
   if (!item?.id) {
     console.error("Monday create_item returned no item ID.");
