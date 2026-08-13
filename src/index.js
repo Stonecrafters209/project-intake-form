@@ -160,23 +160,6 @@ const columnValues = {
     override_all_ids: "true"
   },
 
-  single_select9eisr7g: {
-    index: payload.isContractor ? 0 : 1
-  },
-
-  emailo36r19pa: {
-    email: payload.email.trim(),
-    text: payload.email.trim()
-  },
-
-  color_mm4knkkm: {
-    index: 0
-  },
-
-  color_mm5gjq4b: {
-    index: payload.isContractor ? 0 : 1
-  }
-};
     single_select9eisr7g: {
       index: payload.isContractor ? 0 : 1
     },
