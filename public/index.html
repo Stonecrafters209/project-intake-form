@@ -197,53 +197,29 @@
       color: #df2f4a;
     }
 
-    .success-screen {
-      display: none;
-      text-align: center;
-      padding: 20px 0 10px;
-    }
-
-    .success-screen.visible {
-      display: block;
-    }
-
-    .success-icon {
-      font-size: 52px;
-      margin-bottom: 18px;
-    }
-
-    .success-screen h2 {
-      color: #C9A84C;
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-
-    .success-screen p {
-      color: #aaa;
-      font-size: 15px;
-      line-height: 1.6;
-    }
-
-    .new-project-btn {
-      margin-top: 24px;
-      padding: 12px 22px;
-      background: transparent;
-      color: #C9A84C;
-      border: 1px solid #C9A84C;
-      border-radius: 8px;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .new-project-btn:hover {
-      background: rgba(201,168,76,0.12);
-    }
-
     .required-note {
       font-size: 12px;
       color: #666;
       margin-bottom: 24px;
+    }
+
+    .new-project-btn {
+      display: none;
+      width: 100%;
+      padding: 13px;
+      margin-top: 12px;
+      background: transparent;
+      color: #C9A84C;
+      border: 1px solid #C9A84C;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .new-project-btn:hover {
+      background: rgba(201,168,76,0.1);
     }
   </style>
 </head>
@@ -252,20 +228,18 @@
 
 <div class="card">
 
-  <!-- HEADER -->
   <div class="logo-area">
     <h1>STONE CRAFTERS</h1>
     <p>Project Intake Form — Tell us about your project</p>
   </div>
 
-  <!-- FORM -->
   <form id="leadForm">
 
     <p class="required-note">
       Fields marked with * are required.
     </p>
 
-    <!-- CONTRACTOR TOGGLE -->
+    <!-- CONTRACTOR -->
     <label>Are You a Contractor? *</label>
 
     <div class="toggle-group">
@@ -273,7 +247,6 @@
         type="button"
         class="toggle-btn"
         id="btnNo"
-        onclick="setContractor(false)"
       >
         No — Private Client
       </button>
@@ -282,7 +255,6 @@
         type="button"
         class="toggle-btn"
         id="btnYes"
-        onclick="setContractor(true)"
       >
         Yes — Contractor
       </button>
@@ -293,6 +265,7 @@
       class="contractor-section"
       id="contractorSection"
     >
+
       <label>Company Name *</label>
 
       <input
@@ -308,6 +281,7 @@
         id="contractorName"
         placeholder="e.g. John Smith"
       />
+
     </div>
 
     <!-- JOB NAME -->
@@ -320,7 +294,7 @@
       required
     />
 
-    <!-- PROJECT ADDRESS -->
+    <!-- ADDRESS -->
     <label>Project Address *</label>
 
     <input
@@ -333,8 +307,10 @@
     <!-- PROJECT TYPE -->
     <label>Project Type *</label>
 
-    <select id="projectType" required>
-
+    <select
+      id="projectType"
+      required
+    >
       <option value="">
         — Select a project type —
       </option>
@@ -382,7 +358,6 @@
       <option value="Other">
         Other
       </option>
-
     </select>
 
     <!-- EMAIL -->
@@ -404,7 +379,7 @@
       placeholder="(555) 555-5555"
     />
 
-    <!-- PROJECT DETAILS -->
+    <!-- DETAILS -->
     <label>Project Details &amp; Notes *</label>
 
     <textarea
@@ -428,418 +403,462 @@
       id="statusBox"
     ></div>
 
-  </form>
-
-  <!-- SUCCESS SCREEN -->
-  <div
-    class="success-screen"
-    id="successScreen"
-  >
-    <div class="success-icon">
-      ✅
-    </div>
-
-    <h2>Project Submitted!</h2>
-
-    <p>
-      Thank you for contacting Stone Crafters.
-      <br><br>
-      We received your project information and
-      will be in touch soon.
-    </p>
-
     <button
       type="button"
       class="new-project-btn"
-      onclick="startNewProject()"
+      id="newProjectBtn"
     >
       Submit Another Project
     </button>
-  </div>
+
+  </form>
 
 </div>
 
 <script>
 
-  const BOARD_ID = "18418995265";
-  const GROUP_ID = "group_mm4ktsx2";
+  /*
+   * CONTRACTOR STATE
+   */
 
   let isContractor = null;
 
-  // ─────────────────────────────
-  // CONTRACTOR TOGGLE
-  // ─────────────────────────────
 
-  function setContractor(value) {
+  /*
+   * ELEMENTS
+   */
 
-    isContractor = value;
+  const form =
+    document.getElementById("leadForm");
 
-    document
-      .getElementById("btnYes")
-      .classList
-      .toggle(
-        "active",
-        value === true
-      );
+  const btnYes =
+    document.getElementById("btnYes");
 
-    document
-      .getElementById("btnNo")
-      .classList
-      .toggle(
-        "active",
-        value === false
-      );
+  const btnNo =
+    document.getElementById("btnNo");
 
-    document
-      .getElementById("contractorSection")
-      .classList
-      .toggle(
-        "visible",
-        value === true
-      );
+  const contractorSection =
+    document.getElementById("contractorSection");
+
+  const submitBtn =
+    document.getElementById("submitBtn");
+
+  const statusBox =
+    document.getElementById("statusBox");
+
+  const newProjectBtn =
+    document.getElementById("newProjectBtn");
+
+
+  /*
+   * CONTRACTOR TOGGLE
+   */
+
+  btnYes.addEventListener("click", function () {
+
+    isContractor = true;
+
+    btnYes.classList.add("active");
+    btnNo.classList.remove("active");
+
+    contractorSection.classList.add("visible");
+
+  });
+
+
+  btnNo.addEventListener("click", function () {
+
+    isContractor = false;
+
+    btnNo.classList.add("active");
+    btnYes.classList.remove("active");
+
+    contractorSection.classList.remove("visible");
+
+  });
+
+
+  /*
+   * SHOW ERROR
+   */
+
+  function showError(message) {
+
+    statusBox.textContent =
+      "⚠️  " + message;
+
+    statusBox.className =
+      "status-box error";
+
+    statusBox.style.display =
+      "block";
+
   }
 
 
-  // ─────────────────────────────
-  // FORM SUBMISSION
-  // ─────────────────────────────
+  /*
+   * SHOW SUCCESS
+   */
 
-  document
-    .getElementById("leadForm")
-    .addEventListener(
-      "submit",
-      async function(e) {
+  function showSuccess(message) {
 
-        e.preventDefault();
+    statusBox.textContent =
+      message;
 
-        const submitBtn =
-          document.getElementById(
-            "submitBtn"
+    statusBox.className =
+      "status-box success";
+
+    statusBox.style.display =
+      "block";
+
+  }
+
+
+  /*
+   * SUBMIT FORM
+   */
+
+  form.addEventListener(
+    "submit",
+    async function (event) {
+
+      event.preventDefault();
+
+
+      /*
+       * CONTRACTOR CHECK
+       */
+
+      if (isContractor === null) {
+
+        showError(
+          "Please select whether you are a Contractor or Private Client."
+        );
+
+        return;
+      }
+
+
+      /*
+       * GET FORM VALUES
+       */
+
+      const jobName =
+        document
+          .getElementById("jobName")
+          .value
+          .trim();
+
+      const projectAddress =
+        document
+          .getElementById("projectAddress")
+          .value
+          .trim();
+
+      const projectType =
+        document
+          .getElementById("projectType")
+          .value;
+
+      const email =
+        document
+          .getElementById("emailAddress")
+          .value
+          .trim();
+
+      const phone =
+        document
+          .getElementById("phoneNumber")
+          .value
+          .trim();
+
+      const projectDetails =
+        document
+          .getElementById("projectDetails")
+          .value
+          .trim();
+
+      const contractorCompany =
+        document
+          .getElementById("contractorCompany")
+          .value
+          .trim();
+
+      const contractorName =
+        document
+          .getElementById("contractorName")
+          .value
+          .trim();
+
+
+      /*
+       * REQUIRED FIELD CHECK
+       */
+
+      if (
+        !jobName ||
+        !projectAddress ||
+        !projectType ||
+        !email ||
+        !projectDetails
+      ) {
+
+        showError(
+          "Please fill in all required fields."
+        );
+
+        return;
+      }
+
+
+      /*
+       * CONTRACTOR REQUIRED FIELDS
+       */
+
+      if (
+        isContractor &&
+        (
+          !contractorCompany ||
+          !contractorName
+        )
+      ) {
+
+        showError(
+          "Please enter your company name and your name."
+        );
+
+        return;
+      }
+
+
+      /*
+       * DISABLE BUTTON
+       */
+
+      submitBtn.disabled = true;
+
+      submitBtn.textContent =
+        "Submitting…";
+
+      statusBox.style.display =
+        "none";
+
+
+      /*
+       * PAYLOAD
+       */
+
+      const payload = {
+
+        jobName,
+
+        projectAddress,
+
+        projectType,
+
+        email,
+
+        phone,
+
+        projectDetails,
+
+        isContractor,
+
+        contractorCompany,
+
+        contractorName
+
+      };
+
+
+      /*
+       * SEND TO CLOUDFLARE WORKER
+       */
+
+      try {
+
+        const response =
+          await fetch(
+            "/api/submit-lead",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:
+                JSON.stringify(payload)
+            }
           );
 
-        const statusBox =
-          document.getElementById(
-            "statusBox"
-          );
 
+        /*
+         * READ RESPONSE
+         */
 
-        // Make sure Contractor / Private Client
-        // was selected.
+        let data = {};
 
-        if (isContractor === null) {
+        try {
 
-          showError(
-            "Please select whether you are a Contractor or Private Client."
-          );
+          data =
+            await response.json();
 
-          return;
+        } catch (_) {
+
+          data = {};
+
         }
 
 
-        // Collect form values.
-
-        const jobName =
-          document
-            .getElementById("jobName")
-            .value
-            .trim();
-
-        const projectAddress =
-          document
-            .getElementById("projectAddress")
-            .value
-            .trim();
-
-        const projectType =
-          document
-            .getElementById("projectType")
-            .value;
-
-        const emailVal =
-          document
-            .getElementById("emailAddress")
-            .value
-            .trim();
-
-        const phoneVal =
-          document
-            .getElementById("phoneNumber")
-            .value
-            .trim();
-
-        const projectDetails =
-          document
-            .getElementById("projectDetails")
-            .value
-            .trim();
-
-        const contractorCompany =
-          document
-            .getElementById("contractorCompany")
-            .value
-            .trim();
-
-        const contractorName =
-          document
-            .getElementById("contractorName")
-            .value
-            .trim();
-
-
-        // Required field check.
+        /*
+         * HANDLE ERROR
+         */
 
         if (
-          !jobName ||
-          !projectAddress ||
-          !projectType ||
-          !emailVal ||
-          !projectDetails
+          !response.ok ||
+          !data.success
         ) {
 
           showError(
-            "Please fill in all required fields."
+            data.message ||
+            "We couldn't submit your project. Please try again."
           );
 
+          submitBtn.disabled = false;
+
+          submitBtn.textContent =
+            "Submit Project →";
+
           return;
+
         }
 
 
-        // Contractor-specific check.
+        /*
+         * SUCCESS
+         *
+         * IMPORTANT:
+         * We DO NOT reload the page.
+         */
 
-        if (
-          isContractor &&
-          (
-            !contractorCompany ||
-            !contractorName
-          )
-        ) {
-
-          showError(
-            "Please enter your company name and your name."
-          );
-
-          return;
-        }
+        showSuccess(
+          "✅ Project submitted successfully! We'll be in touch soon."
+        );
 
 
-        // Disable submit button while sending.
+        /*
+         * CLEAR FORM
+         */
+
+        form.reset();
+
+
+        /*
+         * RESET CONTRACTOR SELECTION
+         */
+
+        isContractor = null;
+
+        btnYes.classList.remove(
+          "active"
+        );
+
+        btnNo.classList.remove(
+          "active"
+        );
+
+        contractorSection.classList.remove(
+          "visible"
+        );
+
+
+        /*
+         * CHANGE BUTTON
+         */
 
         submitBtn.disabled = true;
 
         submitBtn.textContent =
-          "Submitting…";
-
-        statusBox.className =
-          "status-box";
-
-        statusBox.style.display =
-          "none";
+          "Project Submitted ✓";
 
 
-        // Build payload.
+        /*
+         * SHOW NEW PROJECT BUTTON
+         */
 
-        const payload = {
-
-          boardId: BOARD_ID,
-
-          groupId: GROUP_ID,
-
-          jobName,
-
-          projectAddress,
-
-          projectType,
-
-          email: emailVal,
-
-          phone: phoneVal,
-
-          projectDetails,
-
-          isContractor,
-
-          contractorCompany,
-
-          contractorName
-
-        };
+        newProjectBtn.style.display =
+          "block";
 
 
-        try {
+      } catch (error) {
 
-          const res =
-            await fetch(
-              "/api/submit-lead",
-              {
-                method: "POST",
+        console.error(
+          "Submission error:",
+          error
+        );
 
-                headers: {
-                  "Content-Type":
-                    "application/json"
-                },
+        showError(
+          "We couldn't submit your project. Please check your connection and try again."
+        );
 
-                body:
-                  JSON.stringify(
-                    payload
-                  )
-              }
-            );
+        submitBtn.disabled = false;
 
-
-          let data = {};
-
-          try {
-
-            data =
-              await res.json();
-
-          } catch (_) {
-
-            data = {};
-
-          }
-
-
-          // Handle failed response.
-
-          if (
-            !res.ok ||
-            !data.success
-          ) {
-
-            const message =
-              data.message ||
-              "We couldn't submit your project. Please try again.";
-
-            showError(message);
-
-            submitBtn.disabled =
-              false;
-
-            submitBtn.textContent =
-              "Submit Project →";
-
-            return;
-          }
-
-
-          // ───────────────────────
-          // SUCCESS
-          // ───────────────────────
-
-          document
-            .getElementById("leadForm")
-            .style.display = "none";
-
-          document
-            .getElementById("successScreen")
-            .classList
-            .add("visible");
-
-
-        } catch (err) {
-
-          console.error(err);
-
-          showError(
-            "We couldn't submit your project. Please check your connection and try again."
-          );
-
-          submitBtn.disabled =
-            false;
-
-          submitBtn.textContent =
-            "Submit Project →";
-        }
+        submitBtn.textContent =
+          "Submit Project →";
 
       }
-    );
+
+    }
+  );
 
 
-  // ─────────────────────────────
-  // ERROR MESSAGE
-  // ─────────────────────────────
+  /*
+   * NEW PROJECT
+   */
 
-  function showError(msg) {
+  newProjectBtn.addEventListener(
+    "click",
+    function () {
 
-    const box =
-      document.getElementById(
-        "statusBox"
+      form.reset();
+
+      isContractor = null;
+
+      btnYes.classList.remove(
+        "active"
       );
 
-    box.textContent =
-      "⚠️  " + msg;
-
-    box.className =
-      "status-box error";
-
-    box.style.display =
-      "block";
-  }
-
-
-  // ─────────────────────────────
-  // START ANOTHER PROJECT
-  // ─────────────────────────────
-
-  function startNewProject() {
-
-    const form =
-      document.getElementById(
-        "leadForm"
+      btnNo.classList.remove(
+        "active"
       );
 
-    const successScreen =
-      document.getElementById(
-        "successScreen"
+      contractorSection.classList.remove(
+        "visible"
       );
 
-    const statusBox =
-      document.getElementById(
-        "statusBox"
-      );
+      statusBox.style.display =
+        "none";
 
-    form.reset();
+      statusBox.className =
+        "status-box";
 
-    isContractor = null;
+      submitBtn.disabled = false;
 
-    document
-      .getElementById("btnYes")
-      .classList
-      .remove("active");
-
-    document
-      .getElementById("btnNo")
-      .classList
-      .remove("active");
-
-    document
-      .getElementById("contractorSection")
-      .classList
-      .remove("visible");
-
-    statusBox.className =
-      "status-box";
-
-    statusBox.style.display =
-      "none";
-
-    document
-      .getElementById("submitBtn")
-      .disabled = false;
-
-    document
-      .getElementById("submitBtn")
-      .textContent =
+      submitBtn.textContent =
         "Submit Project →";
 
-    successScreen
-      .classList
-      .remove("visible");
+      newProjectBtn.style.display =
+        "none";
 
-    form.style.display =
-      "block";
-  }
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    }
+  );
 
 </script>
 
