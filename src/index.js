@@ -32,7 +32,10 @@ function json(data, status = 200, origin = null) {
 
 async function geocodeAddress(address) {
   try {
-    const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(address);
+    const url =
+      "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" +
+      encodeURIComponent(address);
+
     const response = await fetch(url, {
       headers: {
         "Accept-Language": "en",
@@ -40,8 +43,13 @@ async function geocodeAddress(address) {
       },
       signal: AbortSignal.timeout(8000)
     });
-    if (!response.ok) return { address };
+
+    if (!response.ok) {
+      return { address };
+    }
+
     const data = await response.json();
+
     if (Array.isArray(data) && data.length) {
       return {
         address,
@@ -52,6 +60,7 @@ async function geocodeAddress(address) {
   } catch (_) {
     // Geocoding is optional. The lead should still be submitted.
   }
+
   return { address };
 }
 
@@ -63,19 +72,28 @@ async function mondayRequest(token, query, variables) {
       "Authorization": token,
       "API-Version": API_VERSION
     },
-    body: JSON.stringify({ query, variables }),
+    body: JSON.stringify({
+      query,
+      variables
+    }),
     signal: AbortSignal.timeout(15000)
   });
 
   let body;
+
   try {
     body = await response.json();
   } catch (_) {
-    throw new Error(`monday.com returned HTTP ${response.status}`);
+    throw new Error(
+      `monday.com returned HTTP ${response.status}`
+    );
   }
 
   if (!response.ok || body.errors?.length) {
-    const message = body.errors?.map((e) => e.message).join("; ") || `monday.com returned HTTP ${response.status}`;
+    const message =
+      body.errors?.map((e) => e.message).join("; ") ||
+      `monday.com returned HTTP ${response.status}`;
+
     throw new Error(message);
   }
 
@@ -83,22 +101,44 @@ async function mondayRequest(token, query, variables) {
 }
 
 function validatePayload(p) {
-  const required = ["jobName", "projectAddress", "projectType", "email", "projectDetails"];
+  const required = [
+    "jobName",
+    "projectAddress",
+    "projectType",
+    "email",
+    "projectDetails"
+  ];
+
   for (const key of required) {
-    if (typeof p?.[key] !== "string" || !p[key].trim()) {
+    if (
+      typeof p?.[key] !== "string" ||
+      !p[key].trim()
+    ) {
       return `${key} is required.`;
     }
   }
 
-  if (typeof p.email !== "string" || !/^\S+@\S+\.\S+$/.test(p.email.trim())) {
+  if (
+    typeof p.email !== "string" ||
+    !/^\S+@\S+\.\S+$/.test(p.email.trim())
+  ) {
     return "Please enter a valid email address.";
   }
 
-  if (p.isContractor !== true && p.isContractor !== false) {
+  if (
+    p.isContractor !== true &&
+    p.isContractor !== false
+  ) {
     return "Please select whether you are a Contractor or Private Client.";
   }
 
-  if (p.isContractor && (!p.contractorCompany?.trim() || !p.contractorName?.trim())) {
+  if (
+    p.isContractor &&
+    (
+      !p.contractorCompany?.trim() ||
+      !p.contractorName?.trim()
+    )
+  ) {
     return "Please enter your company name and your name.";
   }
 
@@ -107,62 +147,158 @@ function validatePayload(p) {
 
 async function handleSubmit(request, env) {
   const origin = request.headers.get("Origin");
-  if (origin && !ALLOWED_ORIGINS.has(origin)) {
-    return json({ success: false, message: "Request origin not allowed." }, 403, origin);
+
+  if (
+    origin &&
+    !ALLOWED_ORIGINS.has(origin)
+  ) {
+    return json(
+      {
+        success: false,
+        message: "Request origin not allowed."
+      },
+      403,
+      origin
+    );
   }
 
   if (!env.MONDAY_API_TOKEN) {
-    console.error("MONDAY_API_TOKEN secret is not configured.");
-    return json({ success: false, message: "The form is not configured yet. Please try again later." }, 500, origin);
+    console.error(
+      "MONDAY_API_TOKEN secret is not configured."
+    );
+
+    return json(
+      {
+        success: false,
+        message:
+          "The form is not configured yet. Please try again later."
+      },
+      500,
+      origin
+    );
   }
 
   let payload;
+
   try {
     payload = await request.json();
   } catch (_) {
-    return json({ success: false, message: "Invalid form submission." }, 400, origin);
+    return json(
+      {
+        success: false,
+        message: "Invalid form submission."
+      },
+      400,
+      origin
+    );
   }
 
-  const validationError = validatePayload(payload);
+  const validationError =
+    validatePayload(payload);
+
   if (validationError) {
-    return json({ success: false, message: validationError }, 400, origin);
+    return json(
+      {
+        success: false,
+        message: validationError
+      },
+      400,
+      origin
+    );
   }
 
-   const locationData = await geocodeAddress(payload.projectAddress.trim());
+  const locationData =
+    await geocodeAddress(
+      payload.projectAddress.trim()
+    );
 
-  const projectTypeIds = {
-    "kitchen countertops": 1,
-    "shower walls": 2,
-    "fireplace surround": 3,
-    "outdoor kitchen": 4,
-    "tile work": 5,
-    "lvp flooring": 6,
-    "tile backsplash": 7,
-    "counter tops": 8,
-    "bathroom remodel": 9,
-    "full height backsplash": 10,
-    "other": 11
+  /*
+   * PROJECT TYPE
+   *
+   * The form sends the project type as text.
+   * We convert it to lowercase so capitalization
+   * differences do not cause a failure.
+   */
+  const selectedProjectType =
+    payload.projectType
+      .trim()
+      .toLowerCase();
+
+  const projectTypeLabels = {
+    "kitchen countertops":
+      "Kitchen Countertops",
+
+    "shower walls":
+      "Shower Walls",
+
+    "fireplace surround":
+      "Fireplace Surround",
+
+    "outdoor kitchen":
+      "Outdoor Kitchen",
+
+    "tile work":
+      "Tile Work",
+
+    "lvp flooring":
+      "LVP Flooring",
+
+    "tile backsplash":
+      "Tile Backsplash",
+
+    "counter tops":
+      "Counter Tops",
+
+    "bathroom remodel":
+      "Bathroom Remodel",
+
+    "full height backsplash":
+      "Full Height Backsplash",
+
+    "other":
+      "Other"
   };
 
-  const selectedProjectType = payload.projectType.trim().toLowerCase();
-  const projectTypeId = projectTypeIds[selectedProjectType];
+  const projectTypeLabel =
+    projectTypeLabels[
+      selectedProjectType
+    ];
 
-  if (!projectTypeId) {
-    throw new Error(`Invalid project type: ${payload.projectType}`);
+  if (!projectTypeLabel) {
+    return json(
+      {
+        success: false,
+        message:
+          `Invalid project type: ${payload.projectType}`
+      },
+      400,
+      origin
+    );
   }
 
+  /*
+   * MONDAY COLUMN VALUES
+   */
   const columnValues = {
-    location_mm4n35jn: locationData.lat !== undefined
-      ? { address: locationData.address, lat: locationData.lat, lng: locationData.lng }
-      : { address: locationData.address },
+    location_mm4n35jn:
+      locationData.lat !== undefined
+        ? {
+            address: locationData.address,
+            lat: locationData.lat,
+            lng: locationData.lng
+          }
+        : {
+            address: locationData.address
+          },
 
     dropdown_mm4kwhfn: {
-      ids: [projectTypeId],
-      override_all_ids: "true"
+      labels: [projectTypeLabel]
     },
 
     single_select9eisr7g: {
-      index: payload.isContractor ? 0 : 1
+      index: payload.isContractor
+        ? 0
+        : 1
     },
 
     emailo36r19pa: {
@@ -175,14 +311,22 @@ async function handleSubmit(request, env) {
     },
 
     color_mm5gjq4b: {
-      index: payload.isContractor ? 6 : 7
+      index: payload.isContractor
+        ? 6
+        : 7
     }
   };
 
-  };
-
+  /*
+   * CREATE MONDAY ITEM
+   */
   const createItemMutation = `
-    mutation CreateLead($boardId: ID!, $groupId: String!, $itemName: String!, $colVals: JSON!) {
+    mutation CreateLead(
+      $boardId: ID!,
+      $groupId: String!,
+      $itemName: String!,
+      $colVals: JSON!
+    ) {
       create_item(
         board_id: $boardId,
         group_id: $groupId,
@@ -199,25 +343,33 @@ async function handleSubmit(request, env) {
   let item;
 
   try {
-    const data = await mondayRequest(
-      env.MONDAY_API_TOKEN,
-      createItemMutation,
-      {
-        boardId: BOARD_ID,
-        groupId: GROUP_ID,
-        itemName: payload.jobName.trim(),
-        colVals: JSON.stringify(columnValues)
-      }
-    );
+    const data =
+      await mondayRequest(
+        env.MONDAY_API_TOKEN,
+        createItemMutation,
+        {
+          boardId: BOARD_ID,
+          groupId: GROUP_ID,
+          itemName:
+            payload.jobName.trim(),
+          colVals:
+            JSON.stringify(columnValues)
+        }
+      );
 
     item = data?.create_item;
   } catch (error) {
-    console.error("Monday create_item failed:", error.message);
+    console.error(
+      "Monday create_item failed:",
+      error.message
+    );
 
     return json(
       {
         success: false,
-        message: "MONDAY_ERROR: " + error.message
+        message:
+          "MONDAY_ERROR: " +
+          error.message
       },
       200,
       origin
@@ -225,73 +377,161 @@ async function handleSubmit(request, env) {
   }
 
   if (!item?.id) {
-    console.error("Monday create_item returned no item ID.");
+    console.error(
+      "Monday create_item returned no item ID."
+    );
 
     return json(
       {
         success: false,
-        message: "We couldn't confirm the project submission. Please try again."
+        message:
+          "We couldn't confirm the project submission. Please try again."
       },
       502,
       origin
     );
   }
 
-  const noteLines = [];  if (payload.isContractor) {
-    noteLines.push("🏗️ CONTRACTOR INFO");
-    noteLines.push("Company: " + payload.contractorCompany.trim());
-    noteLines.push("Contact: " + payload.contractorName.trim());
+  /*
+   * CREATE MONDAY UPDATE / NOTE
+   */
+  const noteLines = [];
+
+  if (payload.isContractor) {
+    noteLines.push(
+      "🏗️ CONTRACTOR INFO"
+    );
+
+    noteLines.push(
+      "Company: " +
+      payload.contractorCompany.trim()
+    );
+
+    noteLines.push(
+      "Contact: " +
+      payload.contractorName.trim()
+    );
+
     noteLines.push("");
   }
-  if (payload.phone?.trim()) noteLines.push("📞 Phone: " + payload.phone.trim());
-  noteLines.push("📧 Email: " + payload.email.trim());
-  noteLines.push("📍 Address: " + payload.projectAddress.trim());
+
+  if (payload.phone?.trim()) {
+    noteLines.push(
+      "📞 Phone: " +
+      payload.phone.trim()
+    );
+  }
+
+  noteLines.push(
+    "📧 Email: " +
+    payload.email.trim()
+  );
+
+  noteLines.push(
+    "📍 Address: " +
+    payload.projectAddress.trim()
+  );
+
   noteLines.push("");
-  noteLines.push("📋 Project Details:");
-  noteLines.push(payload.projectDetails.trim());
+
+  noteLines.push(
+    "📋 Project Details:"
+  );
+
+  noteLines.push(
+    payload.projectDetails.trim()
+  );
 
   const noteMutation = `
-    mutation AddNote($itemId: ID!, $body: String!) {
-      create_update(item_id: $itemId, body: $body) { id }
+    mutation AddNote(
+      $itemId: ID!,
+      $body: String!
+    ) {
+      create_update(
+        item_id: $itemId,
+        body: $body
+      ) {
+        id
+      }
     }
   `;
 
   try {
-    await mondayRequest(env.MONDAY_API_TOKEN, noteMutation, {
-      itemId: item.id,
-      body: noteLines.join("\n")
-    });
+    await mondayRequest(
+      env.MONDAY_API_TOKEN,
+      noteMutation,
+      {
+        itemId: item.id,
+        body: noteLines.join("\n")
+      }
+    );
   } catch (error) {
-    // The lead itself was created. Do not tell the customer the whole submission failed.
-    console.error("Monday create_update failed for item", item.id, error.message);
+    /*
+     * The lead itself was created.
+     * Do not tell the customer the entire
+     * submission failed if only the note failed.
+     */
+    console.error(
+      "Monday create_update failed for item",
+      item.id,
+      error.message
+    );
   }
 
-    return json({ success: true, itemId: item.id }, 200, origin);
+  return json(
+    {
+      success: true,
+      itemId: item.id
+    },
+    200,
+    origin
+  );
 }
 
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
+    const url =
+      new URL(request.url);
 
-    if (request.method === "OPTIONS") {
+    if (
+      request.method === "OPTIONS"
+    ) {
       return new Response(null, {
         status: 204,
-        headers: corsHeaders(request.headers.get("Origin"))
+        headers: corsHeaders(
+          request.headers.get("Origin")
+        )
       });
     }
 
-    if (url.pathname === "/api/submit-lead") {
-      if (request.method !== "POST") {
+    if (
+      url.pathname ===
+      "/api/submit-lead"
+    ) {
+      if (
+        request.method !== "POST"
+      ) {
         return json(
-          { success: false, message: "Method not allowed." },
+          {
+            success: false,
+            message:
+              "Method not allowed."
+          },
           405,
-          request.headers.get("Origin")
+          request.headers.get(
+            "Origin"
+          )
         );
       }
 
-      return handleSubmit(request, env);
+      return handleSubmit(
+        request,
+        env
+      );
     }
 
-    return env.ASSETS.fetch(request);
+    return env.ASSETS.fetch(
+      request
+    );
   }
 };
