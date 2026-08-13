@@ -129,23 +129,22 @@ async function handleSubmit(request, env) {
   }
 
   const locationData = await geocodeAddress(payload.projectAddress.trim());
-  const projectTypeIds = {
-  "Kitchen Countertops": 1,
+ const projectTypeIds = {
+  "kitchen countertops": 1,
   "shower walls": 2,
-  "Fireplace Surround": 3,
-  "Outdoor Kitchen": 4,
-  "Tile Work": 5,
-  "LVP Flooring": 6,
-  "Tile backsplash": 7,
-  "COUNTER TOPS": 8,
-  "Bathroom remodel": 9,
-  "Full Height Backsplash": 10,
-  "Other": 11
+  "fireplace surround": 3,
+  "outdoor kitchen": 4,
+  "tile work": 5,
+  "lvp flooring": 6,
+  "tile backsplash": 7,
+  "counter tops": 8,
+  "bathroom remodel": 9,
+  "full height backsplash": 10,
+  "other": 11
 };
-
-const selectedProjectType = payload.projectType.trim();
+const selectedProjectType = payload.projectType.trim().toLowerCase();
 const projectTypeId = projectTypeIds[selectedProjectType];
-
+  
 if (!projectTypeId) {
   throw new Error(`Invalid project type: ${selectedProjectType}`);
 }
@@ -160,24 +159,24 @@ const columnValues = {
     override_all_ids: "true"
   },
 
-    single_select9eisr7g: {
-      index: payload.isContractor ? 0 : 1
-    },
+  single_select9eisr7g: {
+    index: payload.isContractor ? 0 : 1
+  },
 
-    emailo36r19pa: {
-      email: payload.email.trim(),
-      text: payload.email.trim()
-    },
+  emailo36r19pa: {
+    email: payload.email.trim(),
+    text: payload.email.trim()
+  },
 
-    color_mm4knkkm: {
-      index: 7
-    },
+  color_mm4knkkm: {
+    index: 7
+  },
 
-    color_mm5gjq4b: {
-      index: payload.isContractor ? 6 : 7
-    }
-  };
-  const createItemMutation = `
+  color_mm5gjq4b: {
+    index: payload.isContractor ? 6 : 7
+  }
+};
+const createItemMutation = `
     mutation CreateLead($boardId: ID!, $groupId: String!, $itemName: String!, $colVals: JSON!) {
       create_item(board_id: $boardId, group_id: $groupId, item_name: $itemName, column_values: $colVals) {
         id
