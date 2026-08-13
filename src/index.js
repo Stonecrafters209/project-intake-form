@@ -179,9 +179,16 @@ async function handleSubmit(request, env) {
     }
   };
 
-};const createItemMutation = `
+  };
+
+  const createItemMutation = `
     mutation CreateLead($boardId: ID!, $groupId: String!, $itemName: String!, $colVals: JSON!) {
-      create_item(board_id: $boardId, group_id: $groupId, item_name: $itemName, column_values: $colVals) {
+      create_item(
+        board_id: $boardId,
+        group_id: $groupId,
+        item_name: $itemName,
+        column_values: $colVals
+      ) {
         id
         name
         url
@@ -190,25 +197,47 @@ async function handleSubmit(request, env) {
   `;
 
   let item;
+
   try {
-    const data = await mondayRequest(env.MONDAY_API_TOKEN, createItemMutation, {
-      boardId: BOARD_ID,
-      groupId: GROUP_ID,
-      itemName: payload.jobName.trim(),
-      colVals: JSON.stringify(columnValues)
-    });
+    const data = await mondayRequest(
+      env.MONDAY_API_TOKEN,
+      createItemMutation,
+      {
+        boardId: BOARD_ID,
+        groupId: GROUP_ID,
+        itemName: payload.jobName.trim(),
+        colVals: JSON.stringify(columnValues)
+      }
+    );
+
     item = data?.create_item;
   } catch (error) {
     console.error("Monday create_item failed:", error.message);
-    return json({ success: false, message: "MONDAY_ERROR: " + error.message }, 200, origin);
-  }
-  if (!item?.id) {
-    console.error("Monday create_item returned no item ID.");
-    return json({ success: false, message: "We couldn't confirm the project submission. Please try again." }, 502, origin);
+
+    return json(
+      {
+        success: false,
+        message: "MONDAY_ERROR: " + error.message
+      },
+      200,
+      origin
+    );
   }
 
-  const noteLines = [];
-  if (payload.isContractor) {
+  if (!item?.id) {
+    console.error("Monday create_item returned no item ID.");
+
+    return json(
+      {
+        success: false,
+        message: "We couldn't confirm the project submission. Please try again."
+      },
+      502,
+      origin
+    );
+  }
+
+  const noteLines = [];  if (payload.isContractor) {
     noteLines.push("🏗️ CONTRACTOR INFO");
     noteLines.push("Company: " + payload.contractorCompany.trim());
     noteLines.push("Contact: " + payload.contractorName.trim());
