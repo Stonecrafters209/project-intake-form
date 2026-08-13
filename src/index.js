@@ -237,7 +237,7 @@ async function handleSubmit(request, env) {
     console.error("Monday create_update failed for item", item.id, error.message);
   }
 
-  return json({ success: true, itemId: item.id }, 200, origin);
+    return json({ success: true, itemId: item.id }, 200, origin);
 }
 
 export default {
@@ -245,13 +245,21 @@ export default {
     const url = new URL(request.url);
 
     if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: corsHeaders(request.headers.get("Origin")) });
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders(request.headers.get("Origin"))
+      });
     }
 
     if (url.pathname === "/api/submit-lead") {
       if (request.method !== "POST") {
-        return json({ success: false, message: "Method not allowed." }, 405, request.headers.get("Origin"));
+        return json(
+          { success: false, message: "Method not allowed." },
+          405,
+          request.headers.get("Origin")
+        );
       }
+
       return handleSubmit(request, env);
     }
 
