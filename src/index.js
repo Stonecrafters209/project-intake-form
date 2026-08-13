@@ -129,16 +129,54 @@ async function handleSubmit(request, env) {
   }
 
   const locationData = await geocodeAddress(payload.projectAddress.trim());
-  const columnValues = {
-    location_mm4n35jn: locationData.lat !== undefined
-      ? { address: locationData.address, lat: locationData.lat, lng: locationData.lng }
-      : { address: locationData.address },
+  const projectTypeIds = {
+  "Kitchen Countertops": 1,
+  "shower walls": 2,
+  "Fireplace Surround": 3,
+  "Outdoor Kitchen": 4,
+  "Tile Work": 5,
+  "LVP Flooring": 6,
+  "Tile backsplash": 7,
+  "COUNTER TOPS": 8,
+  "Bathroom remodel": 9,
+  "Full Height Backsplash": 10,
+  "Other": 11
+};
 
-    dropdown_mm4kwhfn: {
-      ids: [9],
-      override_all_ids: "true"
-    },
+const selectedProjectType = payload.projectType.trim();
+const projectTypeId = projectTypeIds[selectedProjectType];
 
+if (!projectTypeId) {
+  throw new Error(`Invalid project type: ${selectedProjectType}`);
+}
+
+const columnValues = {
+  location_mm4n35jn: locationData.lat !== undefined
+    ? { address: locationData.address, lat: locationData.lat, lng: locationData.lng }
+    : { address: locationData.address },
+
+  dropdown_mm4kwhfn: {
+    ids: [projectTypeId],
+    override_all_ids: "true"
+  },
+
+  single_select9eisr7g: {
+    index: payload.isContractor ? 0 : 1
+  },
+
+  emailo36r19pa: {
+    email: payload.email.trim(),
+    text: payload.email.trim()
+  },
+
+  color_mm4knkkm: {
+    index: 0
+  },
+
+  color_mm5gjq4b: {
+    index: payload.isContractor ? 0 : 1
+  }
+};
     single_select9eisr7g: {
       index: payload.isContractor ? 0 : 1
     },
