@@ -58,7 +58,7 @@ async function geocodeAddress(address) {
       };
     }
   } catch (_) {
-    // Geocoding is optional. The lead should still be submitted.
+    // Geocoding is optional.
   }
 
   return { address };
@@ -145,7 +145,7 @@ function validatePayload(p) {
   return null;
 }
 
-async function handleSubmit(request, env) {
+async function handleSubmit(request, env, ctx) {
   const origin = request.headers.get("Origin");
 
   if (
@@ -214,11 +214,8 @@ async function handleSubmit(request, env) {
 
   /*
    * PROJECT TYPE
-   *
-   * The form sends the project type as text.
-   * We convert it to lowercase so capitalization
-   * differences do not cause a failure.
    */
+
   const selectedProjectType =
     payload.projectType
       .trim()
@@ -260,9 +257,7 @@ async function handleSubmit(request, env) {
   };
 
   const projectTypeLabel =
-    projectTypeLabels[
-      selectedProjectType
-    ];
+    projectTypeLabels[selectedProjectType];
 
   if (!projectTypeLabel) {
     return json(
@@ -279,6 +274,7 @@ async function handleSubmit(request, env) {
   /*
    * MONDAY COLUMN VALUES
    */
+
   const columnValues = {
     location_mm4n35jn:
       locationData.lat !== undefined
@@ -320,6 +316,7 @@ async function handleSubmit(request, env) {
   /*
    * CREATE MONDAY ITEM
    */
+
   const createItemMutation = `
     mutation CreateLead(
       $boardId: ID!,
@@ -350,15 +347,15 @@ async function handleSubmit(request, env) {
         {
           boardId: BOARD_ID,
           groupId: GROUP_ID,
-          itemName:
-            payload.jobName.trim(),
-          colVals:
-            JSON.stringify(columnValues)
+          itemName: payload.jobName.trim(),
+          colVals: JSON.stringify(columnValues)
         }
       );
 
     item = data?.create_item;
+
   } catch (error) {
+
     console.error(
       "Monday create_item failed:",
       error.message
@@ -377,6 +374,7 @@ async function handleSubmit(request, env) {
   }
 
   if (!item?.id) {
+
     console.error(
       "Monday create_item returned no item ID."
     );
@@ -393,11 +391,17 @@ async function handleSubmit(request, env) {
   }
 
   /*
-   * CREATE MONDAY UPDATE / NOTE
+   * CREATE THE PROJECT NOTE
+   *
+   * IMPORTANT:
+   * This now runs in the background.
+   * The customer does NOT have to wait for it.
    */
+
   const noteLines = [];
 
   if (payload.isContractor) {
+
     noteLines.push(
       "🏗️ CONTRACTOR INFO"
     );
@@ -416,6 +420,7 @@ async function handleSubmit(request, env) {
   }
 
   if (payload.phone?.trim()) {
+
     noteLines.push(
       "📞 Phone: " +
       payload.phone.trim()
@@ -456,27 +461,33 @@ async function handleSubmit(request, env) {
     }
   `;
 
-  try {
-    await mondayRequest(
+  /*
+   * Run the note in the background.
+   * The customer does not wait for this.
+   */
+
+  ctx.waitUntil(
+    mondayRequest(
       env.MONDAY_API_TOKEN,
       noteMutation,
       {
         itemId: item.id,
         body: noteLines.join("\n")
       }
-    );
-  } catch (error) {
-    /*
-     * The lead itself was created.
-     * Do not tell the customer the entire
-     * submission failed if only the note failed.
-     */
-    console.error(
-      "Monday create_update failed for item",
-      item.id,
-      error.message
-    );
-  }
+    ).catch((error) => {
+
+      console.error(
+        "Monday create_update failed for item",
+        item.id,
+        error.message
+      );
+
+    })
+  );
+
+  /*
+   * RETURN SUCCESS IMMEDIATELY
+   */
 
   return json(
     {
@@ -489,13 +500,20 @@ async function handleSubmit(request, env) {
 }
 
 export default {
-  async fetch(request, env) {
+
+  async fetch(request, env, ctx) {
+
     const url =
       new URL(request.url);
+
+    /*
+     * CORS PREFLIGHT
+     */
 
     if (
       request.method === "OPTIONS"
     ) {
+
       return new Response(null, {
         status: 204,
         headers: corsHeaders(
@@ -504,13 +522,19 @@ export default {
       });
     }
 
+    /*
+     * SUBMIT LEAD
+     */
+
     if (
       url.pathname ===
       "/api/submit-lead"
     ) {
+
       if (
         request.method !== "POST"
       ) {
+
         return json(
           {
             success: false,
@@ -518,17 +542,20 @@ export default {
               "Method not allowed."
           },
           405,
-          request.headers.get(
-            "Origin"
-          )
+          request.headers.get("Origin")
         );
       }
 
       return handleSubmit(
         request,
-        env
+        env,
+        ctx
       );
     }
+
+    /*
+     * SERVE THE FORM
+     */
 
     return env.ASSETS.fetch(
       request
