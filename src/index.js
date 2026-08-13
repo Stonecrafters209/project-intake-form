@@ -133,13 +133,29 @@ async function handleSubmit(request, env) {
     location_mm4n35jn: locationData.lat !== undefined
       ? { address: locationData.address, lat: locationData.lat, lng: locationData.lng }
       : { address: locationData.address },
-    dropdown_mm4kwhfn: { labels: [payload.projectType.trim()] },
-    single_select9eisr7g: { label: payload.isContractor ? "Yes" : "No" },
-    emailo36r19pa: { email: payload.email.trim(), text: payload.email.trim() },
-    color_mm4knkkm: { label: "New Lead" },
-    color_mm5gjq4b: { label: payload.isContractor ? "Contractor" : "Private Client" }
-  };
 
+    dropdown_mm4kwhfn: {
+      ids: [9],
+      override_all_ids: "true"
+    },
+
+    single_select9eisr7g: {
+      index: payload.isContractor ? 0 : 1
+    },
+
+    emailo36r19pa: {
+      email: payload.email.trim(),
+      text: payload.email.trim()
+    },
+
+    color_mm4knkkm: {
+      index: 7
+    },
+
+    color_mm5gjq4b: {
+      index: payload.isContractor ? 6 : 7
+    }
+  };
   const createItemMutation = `
     mutation CreateLead($boardId: ID!, $groupId: String!, $itemName: String!, $colVals: JSON!) {
       create_item(board_id: $boardId, group_id: $groupId, item_name: $itemName, column_values: $colVals) {
