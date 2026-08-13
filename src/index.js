@@ -128,90 +128,57 @@ async function handleSubmit(request, env) {
     return json({ success: false, message: validationError }, 400, origin);
   }
 
- const locationData = await geocodeAddress(payload.projectAddress.trim());
+   const locationData = await geocodeAddress(payload.projectAddress.trim());
 
-const projectTypeIds = {
-  "kitchen countertops": 1,
-  "shower walls": 2,
-  "fireplace surround": 3,
-  "outdoor kitchen": 4,
-  "tile work": 5,
-  "lvp flooring": 6,
-  "tile backsplash": 7,
-  "counter tops": 8,
-  "bathroom remodel": 9,
-  "full height backsplash": 10,
-  "other": 11
-};
+  const projectTypeIds = {
+    "kitchen countertops": 1,
+    "shower walls": 2,
+    "fireplace surround": 3,
+    "outdoor kitchen": 4,
+    "tile work": 5,
+    "lvp flooring": 6,
+    "tile backsplash": 7,
+    "counter tops": 8,
+    "bathroom remodel": 9,
+    "full height backsplash": 10,
+    "other": 11
+  };
 
-const selectedProjectType = payload.projectType.trim().toLowerCase();
-const projectTypeId = projectTypeIds[selectedProjectType];
+  const selectedProjectType = payload.projectType.trim().toLowerCase();
+  const projectTypeId = projectTypeIds[selectedProjectType];
 
-if (!projectTypeId) {
-  throw new Error(`Invalid project type: ${payload.projectType}`);
-}
-
-const columnValues = {
-  location_mm4n35jn: locationData.lat !== undefined
-    ? { address: locationData.address, lat: locationData.lat, lng: locationData.lng }
-    : { address: locationData.address },
-
-  dropdown_mm4kwhfn: {
-    ids: [projectTypeId],
-    override_all_ids: "true"
-  },
-
- const locationData = await geocodeAddress(payload.projectAddress.trim());
-
-const projectTypeIds = {
-  "kitchen countertops": 1,
-  "shower walls": 2,
-  "fireplace surround": 3,
-  "outdoor kitchen": 4,
-  "tile work": 5,
-  "lvp flooring": 6,
-  "tile backsplash": 7,
-  "counter tops": 8,
-  "bathroom remodel": 9,
-  "full height backsplash": 10,
-  "other": 11
-};
-
-const selectedProjectType = payload.projectType.trim().toLowerCase();
-const projectTypeId = projectTypeIds[selectedProjectType];
-
-if (!projectTypeId) {
-  throw new Error(`Invalid project type: ${payload.projectType}`);
-}
-
-const columnValues = {
-  location_mm4n35jn: locationData.lat !== undefined
-    ? { address: locationData.address, lat: locationData.lat, lng: locationData.lng }
-    : { address: locationData.address },
-
-  dropdown_mm4kwhfn: {
-    ids: [projectTypeId],
-    override_all_ids: "true"
-  },
-
-  single_select9eisr7g: {
-    index: payload.isContractor ? 0 : 1
-  },
-
-  emailo36r19pa: {
-    email: payload.email.trim(),
-    text: payload.email.trim()
-  },
-
-  color_mm4knkkm: {
-    index: 7
-  },
-
-  color_mm5gjq4b: {
-    index: payload.isContractor ? 6 : 7
+  if (!projectTypeId) {
+    throw new Error(`Invalid project type: ${payload.projectType}`);
   }
-};
-  }
+
+  const columnValues = {
+    location_mm4n35jn: locationData.lat !== undefined
+      ? { address: locationData.address, lat: locationData.lat, lng: locationData.lng }
+      : { address: locationData.address },
+
+    dropdown_mm4kwhfn: {
+      ids: [projectTypeId],
+      override_all_ids: "true"
+    },
+
+    single_select9eisr7g: {
+      index: payload.isContractor ? 0 : 1
+    },
+
+    emailo36r19pa: {
+      email: payload.email.trim(),
+      text: payload.email.trim()
+    },
+
+    color_mm4knkkm: {
+      index: 7
+    },
+
+    color_mm5gjq4b: {
+      index: payload.isContractor ? 6 : 7
+    }
+  };
+
 };const createItemMutation = `
     mutation CreateLead($boardId: ID!, $groupId: String!, $itemName: String!, $colVals: JSON!) {
       create_item(board_id: $boardId, group_id: $groupId, item_name: $itemName, column_values: $colVals) {
