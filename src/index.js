@@ -37,7 +37,8 @@ async function geocodeAddress(address) {
       headers: {
         "Accept-Language": "en",
         "User-Agent": "Stone-Crafters-Project-Intake/1.0"
-      }
+      },
+      signal: AbortSignal.timeout(8000)
     });
     if (!response.ok) return { address };
     const data = await response.json();
@@ -62,7 +63,8 @@ async function mondayRequest(token, query, variables) {
       "Authorization": token,
       "API-Version": API_VERSION
     },
-    body: JSON.stringify({ query, variables })
+    body: JSON.stringify({ query, variables }),
+    signal: AbortSignal.timeout(15000)
   });
 
   let body;
