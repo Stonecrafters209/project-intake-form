@@ -214,6 +214,10 @@ async function handleSubmit(request, env, ctx) {
 
   /*
    * PROJECT TYPE
+   *
+   * The form may send different capitalization.
+   * We normalize it for matching, but send
+   * Monday's EXACT existing label.
    */
 
   const selectedProjectType =
@@ -222,38 +226,17 @@ async function handleSubmit(request, env, ctx) {
       .toLowerCase();
 
   const projectTypeLabels = {
-    "kitchen countertops":
-      "Kitchen Countertops",
-
-    "shower walls":
-      "Shower Walls",
-
-    "fireplace surround":
-      "Fireplace Surround",
-
-    "outdoor kitchen":
-      "Outdoor Kitchen",
-
-    "tile work":
-      "Tile Work",
-
-    "lvp flooring":
-      "LVP Flooring",
-
-    "tile backsplash":
-      "Tile Backsplash",
-
-    "counter tops":
-      "Counter Tops",
-
-    "bathroom remodel":
-      "Bathroom Remodel",
-
-    "full height backsplash":
-      "Full Height Backsplash",
-
-    "other":
-      "Other"
+    "kitchen countertops": "Kitchen Countertops",
+    "shower walls": "shower walls",
+    "fireplace surround": "Fireplace Surround",
+    "outdoor kitchen": "Outdoor Kitchen",
+    "tile work": "Tile Work",
+    "lvp flooring": "LVP Flooring",
+    "tile backsplash": "Tile backsplash",
+    "counter tops": "COUNTER TOPS",
+    "bathroom remodel": "Bathroom remodel",
+    "full height backsplash": "Full Height Backsplash",
+    "other": "Other"
   };
 
   const projectTypeLabel =
@@ -393,9 +376,8 @@ async function handleSubmit(request, env, ctx) {
   /*
    * CREATE THE PROJECT NOTE
    *
-   * IMPORTANT:
-   * This now runs in the background.
-   * The customer does NOT have to wait for it.
+   * This runs in the background so the customer
+   * does not have to wait for Monday's note.
    */
 
   const noteLines = [];
@@ -460,11 +442,6 @@ async function handleSubmit(request, env, ctx) {
       }
     }
   `;
-
-  /*
-   * Run the note in the background.
-   * The customer does not wait for this.
-   */
 
   ctx.waitUntil(
     mondayRequest(
